@@ -334,7 +334,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     // additional instrumentation for testing purposes; intended to be left on during development
     public static final boolean CHATTY = DEBUG;
 
-    public static final boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = true;
+    private boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = true;
 
     public static final String ACTION_FAKE_ARTWORK = "fake_artwork";
 
@@ -6162,6 +6162,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SYSTEM_UI_THEME),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCKSCREEN_MEDIA_METADATA),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -6206,6 +6209,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.SYSTEM_UI_THEME))) {
                 updateTheme();
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.LOCKSCREEN_MEDIA_METADATA))) {
+                SHOW_LOCKSCREEN_MEDIA_ARTWORK = Settings.System.getIntForUser(mContext.getContentResolver(),
+                                                Settings.System.LOCKSCREEN_MEDIA_METADATA, 1,
+                                                UserHandle.USER_CURRENT) == 1;
             }
         }
 
