@@ -35,6 +35,7 @@ import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -66,7 +67,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
 public class QSFooterImpl extends FrameLayout implements QSFooter,
-        NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, EmergencyListener,
+        NextAlarmChangeCallback, OnClickListener, OnLongClickListener, OnUserInfoChangedListener, EmergencyListener,
         SignalCallback {
     private static final float EXPAND_INDICATOR_THRESHOLD = .93f;
 
@@ -122,10 +123,12 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mExpandIndicator = findViewById(R.id.expand_indicator);
         mSettingsButton = findViewById(R.id.settings_button);
         mSettingsButton.setOnClickListener(this);
+        mSettingsButton.setOnLongClickListener(this);
 
         mAlarmStatusCollapsed = findViewById(R.id.alarm_status_collapsed);
         mAlarmStatus = findViewById(R.id.alarm_status);
         mDateTimeGroup.setOnClickListener(this);
+        mDateTimeGroup.setOnLongClickListener(this);
 
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
@@ -362,6 +365,27 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                         AlarmClock.ACTION_SHOW_ALARMS), 0);
             }
         }
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (v == mSettingsButton) {
+            if (!Dependency.get(DeviceProvisionedController.class).isCurrentUserSetup()) {
+                // If user isn't setup just unlock the device and dump them back at SUW.
+                mActivityStarter.postQSRunnableDismissingKeyguard(() -> { });
+                return true;
+            }
+            Intent armoryIntent = new Intent(Intent.ACTION_MAIN);
+            armoryIntent.setClassName("com.android.settings", "com.android.settings.Settings$ArmoryActivity");
+            mActivityStarter.startActivity(armoryIntent, true /* dismissShade */);
+            return true;
+        } else if (v == mDateTimeGroup) {
+            Intent calIntent = new Intent(Intent.ACTION_MAIN);
+            calIntent.addCategory(Intent.CATEGORY_APP_CALENDAR);
+            mActivityStarter.postStartActivityDismissingKeyguard(calIntent, 0);
+            return true;
+        }
+        return false;
     }
 
     private void startSettingsActivity() {
