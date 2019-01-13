@@ -174,6 +174,11 @@ public final class DefaultPermissionGrantPolicy {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
+    
+    private static final Set<String> NETWORK_SCORES_PERMISSIONS = new ArraySet<>();
+    static {
+        NETWORK_SCORES_PERMISSIONS.add(Manifest.permission.REQUEST_NETWORK_SCORES);
+    }
 
     private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
 
@@ -386,6 +391,7 @@ public final class DefaultPermissionGrantPolicy {
             grantRuntimePermissions(setupPackage, CONTACTS_PERMISSIONS, userId);
             grantRuntimePermissions(setupPackage, LOCATION_PERMISSIONS, userId);
             grantRuntimePermissions(setupPackage, CAMERA_PERMISSIONS, userId);
+            grantRuntimePermissions(setupPackage, NETWORK_SCORES_PERMISSIONS, userId);
         }
 
         // Camera
